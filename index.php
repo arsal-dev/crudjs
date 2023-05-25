@@ -17,6 +17,10 @@
         </div>
     </div>
 
+    <div class="container mt-5" id="update_alert_show">
+        
+    </div>
+
     <div class="container mt-5">
         <form id="form">
             <div class="form-gourp">
@@ -59,7 +63,7 @@
     </div>
 
 
-    <!-- Modal -->
+<!-- DELETE Modal -->
 <div class="modal fade" id="delete_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -73,6 +77,38 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">NO!</button>
         <button type="button" id="delete_yes" class="btn btn-danger" data-bs-dismiss="modal">YES!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE Modal -->
+<div class="modal fade" id="update_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Update User</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <div class="form-group">
+                <label for="up_name">Name</label>
+                <input type="text" id="up_name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="up_email">Email</label>
+                <input type="email" id="up_email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="up_password">password</label>
+                <input type="text" id="up_password" class="form-control">
+            </div>
+            <input type="hidden" id="up_id">
+
+            <input type="submit" value="update" id="update_mdl_btn" data-bs-dismiss="modal" class="btn btn-primary mt-3">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">NO!</button>
       </div>
     </div>
   </div>
@@ -128,13 +164,11 @@
 
 
         async function showData(){
-            tbody.innerHTML = '';
             let res = await fetch('get_data.php');
             res = await res.text();
             res = JSON.parse(res);
-            
             let data = res.message;
-
+            tbody.innerHTML = '';
             for(let i of data){
                 tbody.innerHTML += 
                 `<tr>
@@ -142,20 +176,23 @@
                     <td>${i.name}</td>
                     <td>${i.email}</td>
                     <td>${i.password}</td>
-                    <td><button class="btn btn-primary">UPDATE</button>&nbsp;&nbsp;<button class="btn btn-danger dlt" id="${i.id}" data-bs-toggle="modal" data-bs-target="#delete_modal">DELETE</button></td>
+                    <td><button class="btn btn-primary update_btn" data-bs-toggle="modal" data-bs-target="#update_modal" id="${i.id}" name="${i.name}" email="${i.email}" password="${i.password}">UPDATE</button>&nbsp;&nbsp;<button class="btn btn-danger dlt" id="${i.id}" data-bs-toggle="modal" data-bs-target="#delete_modal">DELETE</button></td>
                 </tr>`; 
             }
             delete_data();
+            update_data();
         }
 
 
         function delete_data(){
+            let dlt_id;
             let dlt = document.querySelectorAll('.dlt');
             for(let i of dlt){
-                i.addEventListener('click', function(){
-                    let dlt_id = this.id;
-
-                    let delete_yes = document.getElementById('delete_yes');
+                    i.addEventListener('click', function(){
+                    dlt_id = this.id;
+                });
+            }
+            let delete_yes = document.getElementById('delete_yes');
                     delete_yes.addEventListener('click', async function(){
                         let res = await fetch('delete_data.php',{
                             method: 'POST',
@@ -165,11 +202,54 @@
                         res = JSON.parse(res);
                         showData();
                     });
+        }
+        
+        function update_data(){
+            let update_btn = document.querySelectorAll('.update_btn');
+            for(let i of update_btn){
+                i.addEventListener('click', function(){
+                    let update_id = this.getAttribute('id');
+                    let update_name = this.getAttribute('name');
+                    let update_email = this.getAttribute('email');
+                    let update_password = this.getAttribute('password');
+        
+                    document.getElementById('up_id').value = update_id;
+                    document.getElementById('up_name').value = update_name;
+                    document.getElementById('up_email').value = update_email;
+                    document.getElementById('up_password').value = update_password;
                 });
             }
+
+            let update_mdl_btn = document.getElementById('update_mdl_btn');
+
+            update_mdl_btn.addEventListener('click', async function(){
+                let up_id = document.getElementById('up_id').value;
+                let up_name = document.getElementById('up_name').value;
+                let up_email = document.getElementById('up_email').value;
+                let up_password = document.getElementById('up_password').value;
+
+                let update_obj = { up_id, up_name, up_email, up_password };
+                
+                document.getElementById('update_alert_show').innerHTML = `<div class="alert alert-success d-none alert-dismissible fade show" role="alert" id="update-alert">
+                    <strong>Success!</strong> Data Updated Into the Database
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;
+
+                let up_res = await fetch('update_data.php', {
+                    method: "POST",
+                    body: JSON.stringify(update_obj)
+                });
+
+                up_res = await up_res.text();
+                up_res = JSON.parse(up_res);
+                
+                if(up_res.status == 200){
+                    document.getElementById('update-alert').classList.remove('d-none');
+                }
+
+                showData();
+            });
         }
-
-
     </script>
 </body>
 </html>
