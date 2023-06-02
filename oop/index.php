@@ -1,40 +1,50 @@
 <?php 
 
-    class calculation {
-        public $a;
-        public $b;
-        public $c;
+    class user {
+        public $name;
+        public $email;
+        public $password;
+        public $access;
 
-        public function sum(){
-            $this->c = $this->a + $this->b;
-            return $this->c;
+        public function __construct($n,$e,$p)
+        {
+            $this->name = $n;
+            $this->email = $e;
+            $this->password = $p;
         }
 
-        public function sub(){
-            $this->c = $this->a - $this->b;
-            return $this->c;
+        public function userInfo(){
+            return "Name: $this->name <br>
+                    Email: $this->email <br>
+                    Password: $this->password
+                    User: Aam User
+            ";
         }
     }
 
-    $calc1 = new calculation;
+
+    class admin extends user {
+        public function adminInfo(){
+            return "Name: $this->name <br>
+                    Email: $this->email <br>
+                    Password: $this->password <br>
+                    User: Admin
+            ";
+        }
+    }
+
+
+    $adm1 = new admin('admin','admin@email.com','5468435');
+    echo $adm1->adminInfo();
+
+    echo '<br><br>';
+
+    $obj1 = new user('John','john@email.com','12345678');
+    echo $obj1->userInfo();
     
-    $calc1->a = 2;
-    $calc1->b = 6;
-
-    echo $calc1->sum();
-    echo $calc1->sub();
-
-    echo '<br>';
-
-
-    // new obeject of the same class
-
-    $calc2 = new calculation;
+    // $obj2 = new user('John Singh','john@gmail.com','1324678');
+    // $obj3 = new user('John Doe','doe@email.com','65468465');
     
-    $calc2->a = 6;
-    $calc2->b = 66;
-
-    echo $calc2->sum();
-    echo $calc2->sub();
-
-    ?>
+    // echo $obj2->userInfo() . '<br> <br>';
+    // echo $obj3->userInfo();
+?>
